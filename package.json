@@ -1,0 +1,19 @@
+{
+  "name": "friendstar",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -n server,web -c magenta,cyan \"pnpm --filter @friendstar/server dev\" \"pnpm --filter @friendstar/web dev\"",
+    "build": "pnpm --filter @friendstar/web build",
+    "build:demo": "pnpm --filter @friendstar/web build:demo",
+    "start": "pnpm --filter @friendstar/server start",
+    "seed": "pnpm --filter @friendstar/server seed",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm --filter @friendstar/server test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.5",
+    "typescript": "^5.9.3"
+  }
+}

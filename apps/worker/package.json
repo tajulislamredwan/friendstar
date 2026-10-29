@@ -1,0 +1,27 @@
+{
+  "name": "@friendstar/worker",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "build:web": "VITE_REALTIME=ws pnpm --filter @friendstar/web exec vite build --outDir ../worker/public --emptyOutDir && cp static/_headers public/_headers",
+    "dev": "pnpm build && wrangler dev --port 8787",
+    "typecheck": "tsc --noEmit -p .",
+    "deploy": "pnpm build:web && pnpm build && wrangler deploy"
+  },
+  "dependencies": {
+    "@friendstar/shared": "workspace:*",
+    "bcryptjs": "^3.0.3",
+    "hono": "^4.10.0",
+    "nanoid": "^5.1.6",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251001.0",
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.25.10",
+    "typescript": "^5.9.3",
+    "wrangler": "4.102.0"
+  }
+}
