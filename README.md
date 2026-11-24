@@ -1,118 +1,633 @@
-# FriendStar
+FriendStar
 
-A private, mobile-first messenger: one-to-one and group chats, 24-hour status updates, one-to-one and group voice/video calls, public FriendStar IDs, a People directory, and helper bots including an AI assistant. Live at **https://chat.friendstar.workers.dev**.
+A Modern, Mobile-First Messaging Platform
 
-Design documents: [`docs/DESIGN.md`](docs/DESIGN.md) (Phase 1: database schema, API contract, screen flow, folder structure, authentication and security plan) [`docs/PHASE2.md`](docs/PHASE2.md) (groups, status and calls) and [`docs/PHASE3.md`](docs/PHASE3.md) (IDs, People, group calls, bots, owner admin page).
+FriendStar is a modern, mobile-first messaging application designed to make digital communication simple, connected, and privacy-conscious.
 
-## What's included
+It brings together real-time private messaging, group conversations, status updates, voice and video calls, user discovery, and AI-powered assistance in one platform.
 
-- Sign up, sign in and sign out, with sessions that survive a page reload (rotating refresh tokens).
-- Profiles: name, bio and photo.
-- Real-time one-to-one chat over Socket.IO, with typing indicators and online/last-seen.
-- Message ticks: a clock while sending, then one tick (sent), two ticks (delivered) and two amber ticks (read).
-- Unread counts on each chat and on the Chats and Alerts tabs.
-- Photo and file sharing up to 10 MB, with a preview before sending, a lightbox for photos and download links for files.
-- Search across people, messages and file names, with jump-to-message.
-- Notifications: an in-app list, toasts, a soft chime and optional browser notifications.
-- Privacy: last seen, profile photo, read receipts, who can message you, search visibility, and blocking.
-- Friend invites through a shareable profile link, plus a top-of-page link to download the direct-install Android beta APK from the same site.
-- Secure password reset: requests receive a generic response; an owner verifies the requester and issues a one-time, 15-minute reset link. Only token hashes are stored, and existing sessions are revoked after reset. No reset email is sent.
-- Light, dark and system themes; responsive layout from phones up to desktop.
+<p align="center">
+  <strong>Private Conversations. Meaningful Connections.</strong>
+</p><p align="center">
+  <a href="https://chat.friendstar.workers.dev">Live Application</a> ·
+  <a href="https://github.com/tajulislamredwan/friendstar">GitHub Repository</a>
+</p>---
 
-Phase 2 adds:
+Table of Contents
 
-- **Group chats** with a photo, admins, add/remove/promote, leave, system event lines, sender names and all-members-read ticks.
-- **Status**: text (six colour backgrounds) or photo updates that vanish after 24 hours, with seen rings, a full-screen viewer and a viewers list.
-- **Voice and video calls** (one-to-one, WebRTC, peer-to-peer and encrypted) with ringtone, accept/decline, mute, camera on/off, flip camera, minimise, missed-call alerts and a call history tab.
+- "Overview" (#overview)
+- "Key Features" (#key-features)
+- "Privacy and Security" (#privacy-and-security)
+- "Encryption Architecture" (#encryption-architecture)
+- "Technology Stack" (#technology-stack)
+- "System Architecture" (#system-architecture)
+- "Project Structure" (#project-structure)
+- "Getting Started" (#getting-started)
+- "Environment Configuration" (#environment-configuration)
+- "Cloudflare Deployment" (#cloudflare-deployment)
+- "Android Application" (#android-application)
+- "Admin Dashboard" (#admin-dashboard)
+- "Testing" (#testing)
+- "Storage and Infrastructure" (#storage-and-infrastructure)
+- "Customization" (#customization)
+- "Known Limitations" (#known-limitations)
+- "License and Ownership" (#license-and-ownership)
+- "Contact" (#contact)
 
-Phase 3 adds:
+---
 
-- **FriendStar IDs** (`FS-XXXXXX`) for everyone, shown on People, profiles and Settings with copy/share. Each ID has a share link at `/u/FS-XXXXXX`. An exact email or ID always finds a person; a partial name or surname finds anyone who appears in search.
-- **People** tab listing everyone who joined, with their IDs.
-- **Group voice and video calls** in any group: up to 6 people, members get rung, a "Join" banner in the chat, minimise, a summary line and Calls history.
-- **Bots:** Star AI (Cloudflare Workers AI, English/Bangla, `@starai` in groups), Nova Guide (welcomes new people), Echo Bot and Lucky.
-- **Owner-only admin page** at `/admin`: account IDs and emails, account creation and successful sign-in dates, aggregate daily totals, and in-app update announcements with an exact preview, recipient count, separate send confirmation and audit history. Private chat contents are not available in the admin page or its API, and passwords/password hashes are never shown. Only for emails in `OWNER_EMAILS`.
+Overview
 
-## Run it locally
+FriendStar is a full-stack messaging platform built with a mobile-first approach and a modern web technology stack.
 
-You need Node 22.5+ (built and tested on Node 24) and pnpm 9+.
+The application supports real-time communication, user profiles, private and group conversations, multimedia sharing, voice and video calling, and AI-assisted interactions.
 
-```bash
+FriendStar is designed to support independent deployment and infrastructure configuration, making it suitable for customization and future product development.
+
+Live Application
+
+Production URL: https://chat.friendstar.workers.dev
+
+---
+
+Key Features
+
+1. Authentication and User Accounts
+
+- User registration and login
+- Username- and email-based authentication
+- Session persistence
+- Refresh token rotation
+- User profiles with profile photos and biographies
+- Secure password reset workflow
+
+2. Private Messaging
+
+- Real-time one-to-one messaging
+- Message delivery indicators
+- Sent, delivered, and read status
+- Typing indicators
+- Online and last-seen status
+- Unread message counters
+- Message search
+- Jump-to-message functionality
+
+3. Group Communication
+
+- Group chat creation
+- Group profile photos
+- Group administration
+- Member addition and removal
+- Admin promotion
+- Group exit functionality
+- Group message notifications
+- Read status indicators
+
+4. Multimedia Sharing
+
+- Image sharing
+- Document and file sharing
+- File preview before sending
+- Image viewer
+- Downloadable attachments
+- File type and size validation
+
+Current application upload limit: 10 MB per attachment.
+
+5. Status Updates
+
+- Text status updates
+- Photo status updates
+- 24-hour automatic expiration
+- Status viewer
+- Viewers list
+- Seen indicators
+
+6. Voice and Video Calls
+
+- One-to-one voice calls
+- One-to-one video calls
+- Group voice calls
+- Group video calls
+- Call notifications
+- Mute and camera controls
+- Camera switching
+- Call history
+- Call minimization
+
+Group calls currently support up to six participants.
+
+7. FriendStar ID and People Directory
+
+- Unique FriendStar IDs ("FS-XXXXXX")
+- Public profile links
+- People directory
+- User discovery
+- Profile sharing
+- Search by FriendStar ID or email
+
+8. AI Assistant and Bots
+
+FriendStar includes multiple helper bots:
+
+- Star AI: AI-powered assistant supporting English and Bangla.
+- Nova Guide: Welcomes and guides new users.
+- Echo Bot: Automated interaction bot.
+- Lucky: Additional interactive bot.
+
+Star AI uses the Cloudflare Workers AI binding.
+
+9. Privacy Controls
+
+Users can configure:
+
+- Last-seen visibility
+- Profile photo visibility
+- Read receipts
+- Who can send messages
+- Search visibility
+- User blocking
+
+10. User Interface
+
+- Mobile-first responsive design
+- Light theme
+- Dark theme
+- System theme
+- Desktop and mobile layouts
+- Notification center
+- Browser notification support
+
+---
+
+Privacy and Security
+
+FriendStar incorporates multiple security and privacy-oriented mechanisms.
+
+Documented security features include:
+
+- Password hashing using bcrypt
+- JWT-based access authentication
+- Refresh token rotation
+- Hashed refresh-token storage
+- HTTP-only refresh-token cookies
+- Input validation using Zod
+- API rate limiting
+- Conversation membership authorization
+- File type and size validation
+- Signed file URLs in the Cloudflare deployment
+- Security headers
+- Privacy-aware profile information filtering
+
+The application also restricts administrative access through the "OWNER_EMAILS" configuration.
+
+Important: Authentication security, transport encryption, encrypted storage, and End-to-End Encryption are different security properties. They should not be treated as interchangeable.
+
+---
+
+Encryption Architecture
+
+FriendStar supports encrypted WebRTC communication for voice and video calls, as documented in the current project documentation.
+
+End-to-End Encryption (E2EE) for private messages and file attachments must be documented separately from call encryption.
+
+A complete E2EE implementation should ensure that:
+
+1. Encryption takes place on the sender's device.
+2. Decryption takes place only on authorized recipient devices.
+3. The server cannot access plaintext message content.
+4. Encryption keys remain under the control of the communicating users.
+5. Group conversations use an appropriate key-management mechanism.
+
+The current repository documentation does not yet establish these properties for all messaging and file-sharing features.
+
+Before advertising FriendStar as a fully E2EE messaging platform, the implementation and key-management flow should be verified and documented.
+
+---
+
+Technology Stack
+
+FriendStar uses a modern TypeScript-based technology stack.
+
+Layer| Technologies
+Language| TypeScript
+Frontend| React 19
+Build Tool| Vite
+Styling| Tailwind CSS v4
+State Management| Zustand
+Routing| React Router
+Backend| Node.js, Express 5
+Realtime Communication| Socket.IO / WebSockets
+Database| SQLite
+Edge Database Runtime| Cloudflare Durable Objects SQLite
+Validation| Zod
+Authentication| JWT, bcrypt
+Voice and Video| WebRTC
+AI Integration| Cloudflare Workers AI
+Deployment| Cloudflare Workers
+Package Manager| pnpm
+
+---
+
+System Architecture
+
+FriendStar supports two application runtime environments.
+
+Standard Node.js Runtime
+
+The standard runtime uses:
+
+- Express API server
+- SQLite database
+- Socket.IO real-time communication
+- React frontend
+
+Cloudflare Runtime
+
+The Cloudflare deployment uses:
+
+- Cloudflare Workers for application hosting
+- Workers Static Assets for frontend delivery
+- Durable Objects for backend application services
+- SQLite-backed Durable Object storage
+- Native WebSockets for real-time communication
+- Workers AI for AI-assisted features
+
+Communication Flow
+
+              FriendStar Client
+                     |
+                     |
+              Cloudflare Worker
+                     |
+          +----------+----------+
+          |                     |
+     Static Assets        API / WebSockets
+                                |
+                         FriendStarHub
+                                |
+                        Durable Object
+                                |
+                         SQLite Storage
+                                |
+                    Application Services
+                                |
+                     Workers AI (Optional)
+
+Voice and video communication use WebRTC. An optional TURN relay can be configured for connectivity where direct peer-to-peer communication is unavailable.
+
+---
+
+Project Structure
+
+friendstar/
+│
+├── android-wrapper/
+│
+├── apps/
+│   ├── server/
+│   │   └── src/
+│   │
+│   ├── web/
+│   │   └── src/
+│   │
+│   └── worker/
+│       ├── src/
+│       ├── static/
+│       └── scripts/
+│
+├── packages/
+│   └── shared/
+│       └── src/
+│
+├── docs/
+│   ├── DESIGN.md
+│   ├── PHASE2.md
+│   └── PHASE3.md
+│
+├── package.json
+├── pnpm-workspace.yaml
+├── pnpm-lock.yaml
+└── README.md
+
+---
+
+Getting Started
+
+Prerequisites
+
+Install the following:
+
+- Node.js 22.5 or later
+- pnpm 9 or later
+- Git
+
+The project has been tested on Node.js 24.
+
+1. Clone the Repository
+
+git clone https://github.com/tajulislamredwan/friendstar.git
+
 cd friendstar
+
+2. Install Dependencies
+
 pnpm install
-pnpm seed          # requires DEMO_PASSWORD in your local environment; wipes local data
-pnpm dev           # API on :4000, web app on http://localhost:5173
-```
 
-For a single production-style process that serves the built web app and the API together:
+3. Configure Local Environment
 
-```bash
-pnpm build && pnpm start      # open http://localhost:4000
-```
+Set a demo password in your local environment before running the seed command.
 
-Tests:
+DEMO_PASSWORD=your_local_demo_password
 
-```bash
-pnpm typecheck
-pnpm test                      # API + realtime smoke test (uses a temporary database and a random port)
-```
+Use a temporary local-only password. Never use real account credentials.
 
-## Local demo accounts
+4. Initialize Demo Data
 
-`pnpm seed` creates synthetic local accounts and sample conversations, and wipes the local database. Set `DEMO_PASSWORD` in your local environment before seeding; do not use real credentials or seed production.
+pnpm seed
 
-## Browser-only demo build
+Warning: The seed command wipes the local database and creates synthetic demo accounts. Never run it against production data.
 
-The public URL now serves the real multi-user app (see "Live hosting on Cloudflare" below). The demo build is still available for offline showcases.
+5. Start Development Server
 
+pnpm dev
 
-`pnpm build:demo` produces `apps/web/dist-demo`, a static build that runs entirely in the browser with no server. Data is stored in the browser's localStorage, every tab has its own session, and tabs talk to each other through BroadcastChannel, so two tabs can chat in real time. It also includes "Nova", a guide bot that replies so you can see the ticks change. This build uses hash URLs (`/#/login`) because static hosting has no server-side routing.
+The development services run at:
 
-## Configuration
+- Frontend: "http://localhost:5173"
+- API: "http://localhost:4000"
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `PORT` | `4000` | API port |
-| `JWT_SECRET` | generated once into `apps/server/data/.secret` | Set your own (32+ characters) for real deployments; `REQUIRE_JWT_SECRET=1` makes it mandatory |
-| `WEB_ORIGIN` | `http://localhost:5173` | Allowed CORS origin in development |
-| `DATA_DIR` / `DB_FILE` | `apps/server/data/friendstar.db` | SQLite database location |
-| `AUTH_RATE_LIMIT` / `API_RATE_LIMIT` | `20` / `300` per minute | Abuse limits |
-| `UPLOAD_DIR` | `apps/server/uploads` | Uploaded files (served only through the API) |
+6. Production-Style Local Run
 
-## Live hosting on Cloudflare (free plan)
+pnpm build
 
-The public multi-user app runs at **https://chat.friendstar.workers.dev** (Worker `chat`, account subdomain `friendstar`).
+pnpm start
 
-How it is put together (`apps/worker`):
+Open:
 
-- **Static web app**: served by Workers Static Assets with SPA fallback and the security headers in `apps/worker/static/_headers` (CSP, HSTS, no framing).
-- **API + realtime**: every `/api/*` request goes to one SQLite-backed Durable Object (`FriendStarHub`). It runs the *same* users/chat/notifications/auth services as the Node server (`apps/server/src/services`). `build.mjs` swaps in Cloudflare adapters for the database, crypto utilities, realtime hub and bcrypt (`apps/worker/src/platform`).
-- **Realtime**: native hibernatable WebSockets at `/api/ws` instead of Socket.IO. The access token travels as a WebSocket subprotocol, never in the URL. The web client picks its transport at build time (`VITE_REALTIME=ws`, see `apps/web/src/api/realtime.ts`).
-- **Files**: validated (type, size, magic bytes) and stored in 1 MB chunks inside the Durable Object's SQLite database, served via signed URLs.
-- **Secrets**: the JWT/file-URL signing secret is generated on first start and kept only in Durable Object storage.
-- **Extra endpoint**: `DELETE /api/me` with `{ "password": "..." }` deletes the account, its sessions, files, statuses, call history and its one-to-one chats (both sides). It also removes the account from groups, which carry on for everyone else. It exists only in the Cloudflare build.
-- **AI bot**: the Workers AI binding `AI` powers Star AI, capped at 30 messages per person and 200 for the whole app per day to stay inside the free allowance.
-- **Owner**: Worker variable `OWNER_EMAILS` (currently `contact.tajuljayan@gmail.com`) decides who can open `/admin`.
-- **Calls**: WebRTC with STUN only by default. Optional TURN relay: set Worker secrets `TURN_KEY_ID` and `TURN_KEY_API_TOKEN` (Cloudflare Realtime TURN). See [`docs/PHASE2.md`](docs/PHASE2.md).
+http://localhost:4000
 
-Deploy (needs `wrangler login` for the owning account):
+---
 
-```bash
+Environment Configuration
+
+The following variables are documented for the standard Node.js runtime.
+
+Variable| Default| Description
+"PORT"| "4000"| API server port
+"JWT_SECRET"| Generated locally| JWT signing secret
+"REQUIRE_JWT_SECRET"| Not enabled| Require an explicitly configured JWT secret
+"WEB_ORIGIN"| "http://localhost:5173"| Allowed frontend origin
+"DATA_DIR"| Server data directory| Database directory
+"DB_FILE"| "friendstar.db"| SQLite database file
+"AUTH_RATE_LIMIT"| "20"| Authentication rate limit
+"API_RATE_LIMIT"| "300"| API rate limit
+"UPLOAD_DIR"| Server uploads directory| File upload storage location
+"OWNER_EMAILS"| Deployment-specific| Authorized admin email addresses
+
+Cloudflare deployment secrets and bindings are configured separately through Wrangler and the Cloudflare dashboard.
+
+Security Recommendations
+
+- Generate a strong, unique JWT secret.
+- Never commit secrets to GitHub.
+- Keep production and development credentials separate.
+- Restrict administrative access.
+- Review third-party service credentials before deployment.
+- Rotate credentials if they are exposed.
+
+---
+
+Cloudflare Deployment
+
+FriendStar supports deployment using Cloudflare Workers.
+
+Prerequisites
+
+- A Cloudflare account
+- Wrangler CLI
+- Access to the target Cloudflare account
+- Properly configured Worker bindings and secrets
+
+1. Authenticate with Cloudflare
+
+npx wrangler login
+
+2. Navigate to the Worker Directory
+
 cd apps/worker
-pnpm build:web     # builds the web app with the WebSocket transport into ./public
-pnpm build         # bundles the Worker into ./dist
+
+3. Build the Web Application
+
+pnpm build:web
+
+4. Build the Worker
+
+pnpm build
+
+5. Deploy
+
 npx wrangler deploy
-```
 
-Local run of the Cloudflare build: `pnpm build:web && pnpm build && npx wrangler dev --port 8787`.
+6. Run Locally
 
-Checks:
+pnpm build:web
 
-- `node scripts/cf-smoke.mjs [baseUrl]` runs 37 REST/WebSocket/file checks with two throwaway accounts, then deletes them.
-- `python3 scripts/prod_check.py [baseUrl]` runs a two-browser live check plus a homepage screenshot, then deletes its accounts.
-- `node scripts/phase2-smoke.mjs [baseUrl]` runs about 55 group/status/call API and WebSocket checks with three throwaway accounts.
-- `python3 scripts/e2e_phase2.py [baseUrl] [shotsDir]` runs the two-browser Phase 2 test, including a real video call.
-- `node scripts/phase3-smoke.mjs [baseUrl]` runs about 40 checks for IDs, search, People, bots (including Star AI), group call signalling and admin access. Add `--owner` only on a local copy.
-- `python3 scripts/e2e_phase3.py [baseUrl] [shotsDir]` runs a three-browser test: People/ID/search, bots, and a 3-person group video call.
+pnpm build
 
-Free-plan limits worth knowing: about 100,000 Worker/Durable Object requests per day (WebSocket messages count at 1/20 of a request), 5 GB total Durable Object storage, and a 10 MB upload cap set by the app. Group calls are a peer-to-peer mesh capped at 6 people. Workers AI's free allowance is about 10,000 "neurons" per day. Data is persistent; it does not reset when the object sleeps. A single Durable Object handles all users, which suits a friends-and-family group well but not thousands of concurrent users.
+npx wrangler dev --port 8787
+
+Open:
+
+http://localhost:8787
+
+Cloudflare Configuration
+
+Configure the following according to the deployment environment:
+
+- Worker name
+- Worker account
+- Durable Objects bindings
+- Durable Objects migrations
+- Workers AI binding
+- Authorized owner emails
+- Optional TURN credentials
+- Custom domain and DNS
+- Production secrets
+
+Optional TURN configuration uses:
+
+TURN_KEY_ID
+TURN_KEY_API_TOKEN
+
+Do not publish secret values in source code or documentation.
+
+---
+
+Android Application
+
+FriendStar includes an Android wrapper project.
+
+The application also provides access to a direct-install Android beta APK through its web application.
+
+Live application: https://chat.friendstar.workers.dev
+
+Android package configuration and signing should be reviewed before preparing a production release.
+
+---
+
+Admin Dashboard
+
+FriendStar includes an owner-restricted administrative interface.
+
+Admin route:
+
+/admin
+
+The documented dashboard features include:
+
+- Account IDs and email addresses
+- Account creation dates
+- Successful sign-in dates
+- Aggregate daily account statistics
+- In-app announcements
+- Announcement preview
+- Recipient count
+- Send confirmation
+- Announcement audit history
+
+Administrative access is controlled by:
+
+OWNER_EMAILS
+
+The documented admin interface does not expose private chat contents or user passwords.
+
+---
+
+Testing
+
+FriendStar includes automated checks for application functionality.
+
+Type Checking
+
+pnpm typecheck
+
+General Tests
+
+pnpm test
+
+Cloudflare Smoke Tests
+
+node scripts/cf-smoke.mjs
+
+Production Checks
+
+python3 scripts/prod_check.py
+
+Phase 2 Checks
+
+node scripts/phase2-smoke.mjs
+
+Phase 2 Browser Tests
+
+python3 scripts/e2e_phase2.py
+
+Phase 3 Checks
+
+node scripts/phase3-smoke.mjs
+
+Phase 3 Browser Tests
+
+python3 scripts/e2e_phase3.py
+
+Run tests in an appropriate development or staging environment. Review each script's arguments before running it against a deployed instance.
+
+---
+
+Storage and Infrastructure
+
+FriendStar's deployment model determines where application data is stored.
+
+In the documented Cloudflare deployment:
+
+- Account and application data are stored in Durable Object SQLite storage.
+- Uploaded files are stored in SQLite-backed chunks.
+- Authentication and application services run through the Worker and Durable Object architecture.
+- AI-assisted features use the configured Workers AI service.
+- WebRTC calls may use an optional TURN relay.
+
+The application also includes an account deletion endpoint in the Cloudflare build:
+
+DELETE /api/me
+
+This endpoint requires the user's password and deletes the account and associated data described in the project documentation.
+
+Note: Data persistence, encryption at rest, transport encryption, and E2EE are separate matters. Deployment owners should review their storage and service configuration.
+
+---
+
+Customization
+
+FriendStar can be adapted for different deployment environments and branding requirements.
+
+Potential customization areas include:
+
+- Application name
+- Logo and favicon
+- Brand colors
+- Domain and subdomain
+- Android application identity
+- Admin access
+- AI configuration
+- Infrastructure and storage
+- Privacy and terms pages
+- Application interface
+
+Some changes may require frontend, backend, or Android build modifications.
+
+---
+
+Known Limitations
+
+The current documented deployment has several infrastructure considerations:
+
+- The Cloudflare deployment uses a single Durable Object for application data and services.
+- A single Durable Object may become a scalability bottleneck under heavy concurrent usage.
+- Group calls currently support up to six participants.
+- File uploads are limited to 10 MB.
+- Workers AI usage is subject to the configured service allowance and limits.
+- The Cloudflare free-plan limits and pricing may change over time.
+
+For larger deployments, architecture and infrastructure capacity should be reviewed before production scaling.
+
+---
+
+License and Ownership
+
+The repository's license and intellectual-property terms should be reviewed before redistribution, commercial use, or modification.
+
+Third-party dependencies remain subject to their respective licenses.
+
+For commercial acquisition, white-label deployment, source-code transfer, or custom licensing, the applicable terms should be agreed upon separately in writing.
+
+---
+
+Contact
+
+Project: FriendStar
+
+Developed by: INNOVERSA Technologies
+
+Developer: Tajul Islam Redwan
+
+GitHub: https://github.com/tajulislamredwan
+
+Live Application: https://chat.friendstar.workers.dev
+
+---
+
+<p align="center">
+  <strong>FriendStar — Private Conversations. Meaningful Connections.</strong>
+  <br />
+  Built with modern web technologies.
+</p>
