@@ -13,28 +13,6 @@ It brings together real-time private messaging, group conversations, status upda
   <a href="https://github.com/tajulislamredwan/friendstar">GitHub Repository</a>
 </p>---
 
-Table of Contents
-
-- "Overview" (#overview)
-- "Key Features" (#key-features)
-- "Privacy and Security" (#privacy-and-security)
-- "Encryption Architecture" (#encryption-architecture)
-- "Technology Stack" (#technology-stack)
-- "System Architecture" (#system-architecture)
-- "Project Structure" (#project-structure)
-- "Getting Started" (#getting-started)
-- "Environment Configuration" (#environment-configuration)
-- "Cloudflare Deployment" (#cloudflare-deployment)
-- "Android Application" (#android-application)
-- "Admin Dashboard" (#admin-dashboard)
-- "Testing" (#testing)
-- "Storage and Infrastructure" (#storage-and-infrastructure)
-- "Customization" (#customization)
-- "Known Limitations" (#known-limitations)
-- "License and Ownership" (#license-and-ownership)
-- "Contact" (#contact)
-
----
 
 Overview
 
